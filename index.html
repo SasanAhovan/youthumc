@@ -4,426 +4,149 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Youth Events</title>
-
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <style>
-    /* Modern Color Palette & Typography Defaults */
     :root {
-        --bg-color: #f8fafc; /* Lighter background */
+        --bg-color-start: #ffffff;
+        --bg-color-end: #f1f5f9;
         --card-bg-color: #ffffff;
-        --primary-color: #4f46e5; /* Deeper indigo/violet */
-        --primary-light: #e0e7ff; /* Light version for accents */
-        --text-color-dark: #1e293b; /* Darker text for headings */
-        --text-color-medium: #475569; /* Medium dark for body text */
-        --text-color-light: #64748b; /* Lighter text for minor details */
-        --special-event-color: #f97316; /* Orange for special events */
+        --primary-color: #4f46e5;
+        --primary-light: #e0e7ff;
+        --text-color-dark: #1e293b;
+        --text-color-medium: #475569;
+        --text-color-light: #64748b;
+        --special-event-color: #f97316;
         --border-color: #e2e8f0;
         --success-color: #22c55e;
         --danger-color: #ef4444;
         --shadow-light: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
         --shadow-medium: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
-
-        font-family: 'Inter', sans-serif; /* Modern, clean sans-serif font */
+        font-family: 'Inter', sans-serif;
         font-size: 16px;
         line-height: 1.6;
     }
-
     body {
-        background-color: var(--bg-color);
+        background-color: var(--bg-color-end);
+        background-image: radial-gradient(circle at top center, var(--bg-color-start) 0%, var(--bg-color-end) 100%);
+        min-height: 100vh;
         margin: 0;
-        padding: 2rem 1rem;
+        padding: 1rem;
         color: var(--text-color-medium);
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
+        box-sizing: border-box;
     }
-
-    .event-container {
-        max-width: 800px;
-        margin: auto;
-        padding: 30px; /* Increased padding */
-        background-color: var(--card-bg-color);
-        border-radius: 12px; /* Softer rounded corners */
-        box-shadow: var(--shadow-medium); /* More prominent shadow for the main container */
-    }
-
-    .event-header {
-        text-align: center;
-        margin-bottom: 30px;
-        padding-bottom: 20px; /* Space below header */
-        border-bottom: 1px solid var(--border-color); /* Subtle separator */
-    }
-
-    .event-header h1 {
-        font-size: 2.8rem; /* Slightly larger heading */
-        color: var(--text-color-dark);
-        font-weight: 700;
-        margin-bottom: 10px;
-        letter-spacing: -0.025em; /* Tighter letter spacing for headings */
-    }
-
-    /* --- Tab Styles --- */
-    .event-tabs {
-        display: flex;
-        justify-content: center;
-        margin-bottom: 30px;
-    }
-
-    .tab-button {
-        padding: 12px 25px; /* More generous padding */
-        font-size: 1.05rem;
-        font-weight: 600;
-        border: none;
-        background-color: transparent;
-        cursor: pointer;
-        color: var(--text-color-light);
-        position: relative;
-        transition: color 0.2s ease-in-out;
-    }
-
-    .tab-button::after {
-        content: '';
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        height: 3px; /* Indicator line thickness */
-        background-color: transparent;
-        transition: background-color 0.2s ease-in-out;
-    }
-
-    .tab-button.active {
-        color: var(--primary-color);
-    }
-
-    .tab-button.active::after {
-        background-color: var(--primary-color);
-    }
-
-    .tab-button:hover:not(.active) {
-        color: var(--primary-color);
-    }
-
-    /* --- Event Card Styles --- */
-    .event {
-        background: var(--card-bg-color);
-        border-radius: 8px;
-        box-shadow: var(--shadow-light); /* Lighter shadow for individual cards */
-        padding: 25px; /* Adjusted padding */
-        margin-bottom: 20px;
-        border-left: 5px solid var(--primary-color);
-        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-    }
-
-    .event:hover {
-        transform: translateY(-3px); /* Subtle lift on hover */
-        box-shadow: var(--shadow-medium); /* Enhanced shadow on hover */
-    }
-
-    .event.special-event {
-        border-left-color: var(--special-event-color);
-    }
-    .event.special-event .event-month {
-        color: var(--special-event-color);
-    }
-
-    .event-month {
-        font-weight: 600;
-        color: var(--primary-color);
-        font-size: 1.1rem; /* Slightly smaller for balance */
-        margin-bottom: 8px;
-        text-transform: uppercase; /* Uppercase for a clean look */
-        letter-spacing: 0.05em;
-    }
-
-    .event-details {
-        font-size: 1.05rem;
-        line-height: 1.5;
-        color: var(--text-color-dark);
-    }
-
-    .event-details strong {
-        display: block;
-        margin-bottom: 5px;
-        font-weight: 700;
-        color: var(--text-color-dark);
-    }
-
-    /* --- Navigation Button Styles --- */
-    #event-navigation {
-        display: flex;
-        justify-content: space-between;
-        margin-top: 30px;
-        padding-top: 20px;
-        border-top: 1px solid var(--border-color);
-    }
-
-    .nav-button {
-        padding: 12px 28px; /* Larger buttons */
-        font-size: 1rem;
-        font-weight: 600; /* Medium bold */
-        cursor: pointer;
-        background-color: var(--primary-color);
-        color: white;
-        border: none;
-        border-radius: 8px; /* Slightly more rounded */
-        box-shadow: var(--shadow-light);
-        transition: background-color 0.2s ease-in-out, transform 0.1s ease-out, box-shadow 0.2s ease-in-out;
-    }
-
-    .nav-button:hover:not(:disabled) {
-        background-color: #4338ca; /* Darker primary on hover */
-        transform: translateY(-2px);
-        box-shadow: var(--shadow-medium);
-    }
-
-    .nav-button:active:not(:disabled) {
-        transform: translateY(0);
-        box-shadow: var(--shadow-light);
-    }
-
-    .nav-button:disabled {
-        background-color: #cbd5e1; /* Lighter grey for disabled */
-        color: #94a3b8; /* Lighter text on disabled */
-        cursor: not-allowed;
-        box-shadow: none;
-        transform: none;
-    }
-
-    #no-upcoming-message {
-        text-align: center;
-        padding: 60px 20px; /* More generous padding */
-        font-size: 1.3rem;
-        color: var(--text-color-light);
-        background-color: var(--primary-light); /* Light primary background */
-        border-radius: 8px;
-        margin-top: 30px;
-        font-weight: 500;
-        display: none; /* Keep hidden by default */
-    }
-
-    /* --- RSVP Form Styles --- */
-    .rsvp-section {
-        border-top: 1px solid var(--border-color);
-        margin-top: 25px;
-        padding-top: 25px;
-    }
-
-    .rsvp-form label {
-        display: block;
-        font-weight: 600;
-        margin-bottom: 8px;
-        color: var(--text-color-dark);
-    }
-
-    .rsvp-form input {
-        width: 100%; /* Full width */
-        padding: 12px;
-        border: 1px solid var(--border-color);
-        border-radius: 6px;
-        margin-bottom: 15px;
-        font-size: 1rem;
-        color: var(--text-color-dark);
-        box-sizing: border-box; /* Include padding in width */
-        transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-    }
-
-    .rsvp-form input:focus {
-        outline: none;
-        border-color: var(--primary-color);
-        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2); /* Focus ring */
-    }
-
-    .rsvp-buttons {
-        display: flex;
-        gap: 10px; /* Space between buttons */
-    }
-
-    .rsvp-buttons button {
-        flex-grow: 1; /* Make buttons expand equally */
-        padding: 12px 18px;
-        border: none;
-        border-radius: 6px;
-        color: white;
-        font-weight: 600;
-        cursor: pointer;
-        transition: background-color 0.2s ease-in-out, transform 0.1s, opacity 0.1s;
-        box-shadow: var(--shadow-light);
-    }
-
-    .rsvp-buttons button:hover:not(:disabled) {
-        opacity: 0.9;
-        transform: translateY(-1px);
-    }
-
-    .rsvp-buttons button:active:not(:disabled) {
-        transform: translateY(0);
-        opacity: 1;
-    }
-
-    .rsvp-buttons button:disabled {
-        cursor: not-allowed;
-        opacity: 0.5;
-        box-shadow: none;
-    }
-
+    .event-container { max-width: 800px; margin: auto; padding: 20px; background-color: var(--card-bg-color); border-radius: 12px; box-shadow: var(--shadow-medium); }
+    .event-header { text-align: center; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid var(--border-color); }
+    .event-header h1 { font-size: 2.5rem; color: var(--text-color-dark); font-weight: 700; margin-bottom: 10px; letter-spacing: -0.025em; }
+    .event-tabs { display: flex; justify-content: center; margin-bottom: 20px; }
+    .tab-button { padding: 12px 20px; font-size: 1rem; font-weight: 600; border: none; background-color: transparent; cursor: pointer; color: var(--text-color-light); position: relative; transition: color 0.2s ease-in-out; }
+    .tab-button::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 3px; background-color: transparent; transform: scaleX(0); transition: transform 0.3s ease; }
+    .tab-button.active { color: var(--primary-color); }
+    .tab-button.active::after { background-color: var(--primary-color); transform: scaleX(1); }
+    .tab-button:hover:not(.active) { color: var(--primary-color); }
+    .event { background: var(--card-bg-color); border-radius: 8px; box-shadow: var(--shadow-light); padding: 25px; margin-bottom: 20px; border-left: 5px solid var(--primary-color); }
+    .event.special-event { border-left-color: var(--special-event-color); }
+    .event.special-event .event-month { color: var(--special-event-color); }
+    .event-month { font-weight: 600; color: var(--primary-color); font-size: 1rem; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em; }
+    .event-details { font-size: 1.05rem; line-height: 1.5; color: var(--text-color-dark); font-weight: 500; }
+    .event-details strong { font-weight: 700; }
+    #event-navigation { display: flex; justify-content: space-between; margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border-color); }
+    .nav-button { padding: 10px 20px; font-size: 1rem; font-weight: 600; cursor: pointer; background-color: var(--primary-color); color: white; border: none; border-radius: 8px; box-shadow: var(--shadow-light); transition: all 0.2s ease; }
+    .nav-button:hover:not(:disabled) { background-color: #4338ca; transform: translateY(-2px); box-shadow: var(--shadow-medium); }
+    .nav-button:disabled { background-color: #cbd5e1; color: #94a3b8; cursor: not-allowed; box-shadow: none; transform: none; }
+    #no-upcoming-message { text-align: center; padding: 40px 20px; font-size: 1.2rem; color: var(--text-color-light); background-color: var(--primary-light); border-radius: 8px; margin-top: 20px; font-weight: 500; display: none; }
+    .rsvp-section { border-top: 1px solid var(--border-color); margin-top: 25px; padding-top: 25px; }
+    .rsvp-form label { display: block; font-weight: 600; margin-bottom: 8px; color: var(--text-color-dark); }
+    .rsvp-form input { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 6px; margin-bottom: 15px; font-size: 1rem; color: var(--text-color-dark); box-sizing: border-box; transition: all 0.2s ease; }
+    .rsvp-form input:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2); }
+    .rsvp-buttons { display: flex; gap: 10px; }
+    .rsvp-buttons button { flex-grow: 1; padding: 12px 15px; border: none; border-radius: 6px; color: white; font-weight: 600; cursor: pointer; transition: all 0.2s ease; box-shadow: var(--shadow-light); }
+    .rsvp-buttons button:hover:not(:disabled) { opacity: 0.9; transform: translateY(-1px); }
+    .rsvp-buttons button:disabled { cursor: not-allowed; opacity: 0.5; box-shadow: none; }
     .rsvp-going { background-color: var(--success-color); }
-    .rsvp-going:hover:not(:disabled) { background-color: #16a34a; } /* Darker green on hover */
     .rsvp-not-going { background-color: var(--danger-color); }
-    .rsvp-not-going:hover:not(:disabled) { background-color: #dc2626; } /* Darker red on hover */
-
-
-    /* --- Attendee List Styles --- */
-    .attendee-list {
-        margin-top: 20px;
-        background-color: var(--bg-color); /* Light background for the list */
-        border-radius: 8px;
-        padding: 15px;
-    }
-
-    .attendee-details {
-        margin-top: 15px;
-        border: 1px solid var(--border-color);
-        border-radius: 6px;
-        overflow: hidden; /* Ensures child elements respect border-radius */
-    }
-
-    .attendee-summary {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 12px 15px;
-        font-weight: 600;
-        cursor: pointer;
-        list-style: none;
-        position: relative;
-        transition: background-color 0.2s ease-in-out;
-        color: var(--text-color-dark);
-    }
-
+    .attendee-list { margin-top: 20px; background-color: var(--bg-color-end); border-radius: 8px; padding: 15px; }
+    .attendee-details { margin-top: 15px; border: 1px solid var(--border-color); border-radius: 6px; overflow: hidden; }
+    .attendee-summary { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; font-weight: 600; cursor: pointer; list-style: none; position: relative; transition: background-color 0.2s; color: var(--text-color-dark); }
     .attendee-summary::-webkit-details-marker { display: none; }
-    .attendee-summary::after {
-        content: '▼'; /* Unicode down arrow */
-        font-size: 0.8rem;
-        color: var(--text-color-light);
-        transition: transform 0.2s;
-    }
-    details[open] > .attendee-summary::after {
-        transform: rotate(180deg);
-    }
-
-    .going-summary {
-        background-color: #dcfce7; /* Light green */
-        color: #16a34a; /* Darker green text */
-    }
-    .going-summary:hover { background-color: #bbf7d0; }
-
-    .not-going-summary {
-        background-color: #fee2e2; /* Light red */
-        color: #dc2626; /* Darker red text */
-    }
-    .not-going-summary:hover { background-color: #fecaca; }
-
-    .attendee-names {
-        list-style-type: none;
-        padding: 0; /* Remove default list padding */
-        margin: 0;
-        border-top: 1px solid var(--border-color);
-        background-color: var(--card-bg-color); /* White background for names */
-    }
-
-    .attendee-names li {
-        padding: 10px 15px;
-        border-bottom: 1px solid var(--border-color);
-        color: var(--text-color-medium);
-        font-size: 0.95rem;
-    }
-
-    .attendee-names li:last-child {
-        border-bottom: none;
-    }
-
-    /* Hide the old, default event display for upcoming,
-       as we'll be dynamically inserting and showing one by one. */
+    .attendee-summary::after { content: '▼'; font-size: 0.8rem; color: var(--text-color-light); transition: transform 0.2s; }
+    details[open] > .attendee-summary::after { transform: rotate(180deg); }
+    .going-summary { background-color: #dcfce7; color: #16a34a; }
+    .not-going-summary { background-color: #fee2e2; color: #dc2626; }
+    .attendee-names { list-style-type: none; padding: 0; margin: 0; border-top: 1px solid var(--border-color); background-color: var(--card-bg-color); }
+    .attendee-names li { padding: 10px 15px; border-bottom: 1px solid var(--border-color); color: var(--text-color-medium); font-size: 0.95rem; }
+    .attendee-names li:last-child { border-bottom: none; }
     #upcoming-events-container .event { display: none; }
-    /* Past events container initially hidden, will show all in a list */
     #past-events-container { display: none; }
-    #past-events-container .event { display: block !important; } /* Override individual event display:none */
-
+    #past-events-container .event { display: block !important; }
+    .custom-alert-hidden { display: none !important; }
+    #custom-alert-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(30, 41, 59, 0.5); display: flex; justify-content: center; align-items: center; z-index: 1000; opacity: 0; transition: opacity 0.2s ease-in-out; }
+    #custom-alert-overlay:not(.custom-alert-hidden) { opacity: 1; }
+    #custom-alert-box { background-color: white; padding: 30px; border-radius: 12px; box-shadow: var(--shadow-medium); text-align: center; max-width: 400px; width: 90%; transform: scale(0.95); transition: transform 0.2s ease-in-out; }
+    #custom-alert-overlay:not(.custom-alert-hidden) #custom-alert-box { transform: scale(1); }
+    #custom-alert-message { font-size: 1.1rem; color: var(--text-color-medium); margin: 0 0 25px 0; }
+    #custom-alert-close { padding: 10px 30px; border: none; background-color: var(--primary-color); color: white; border-radius: 8px; font-weight: 600; cursor: pointer; transition: background-color 0.2s; }
+    #custom-alert-close:hover { background-color: #4338ca; }
+    @media (max-width: 600px) {
+        body { padding: 0.5rem; }
+        .event-container { padding: 15px; margin: 0.5rem; }
+        .event-header h1 { font-size: 2rem; }
+        .tab-button { padding: 10px 15px; font-size: 1rem; }
+        .nav-button { padding: 10px 20px; }
+        .event { padding: 20px; }
+    }
 </style>
 </head>
 <body>
 
 <div class="event-container">
     <div class="event-header">
-        <h2>Youth Events</h2>
+        <h1>Youth Events</h1>
         <div class="event-tabs">
             <button class="tab-button active" id="upcoming-tab">Upcoming</button>
             <button class="tab-button" id="past-tab">Past Events</button>
         </div>
     </div>
-
     <div id="upcoming-events-container">
-        <div id="event-display-area">
-            </div>
+        <div id="event-display-area"></div>
         <div id="event-navigation">
             <button class="nav-button" id="prev-event-btn">❮ Previous</button>
             <button class="nav-button" id="next-event-btn">Next ❯</button>
         </div>
-        <div id="no-upcoming-message" style="display: none;">
-            No upcoming events are scheduled at the moment. Please check back soon!
-        </div>
+        <div id="no-upcoming-message"></div>
     </div>
-
-    <div id="past-events-container" style="display: none;">
-        </div>
+    <div id="past-events-container"></div>
 </div>
 
 <div id="all-events-source" style="display: none;">
     <div class="event" id="2025-09-28" data-event-date="2025-09-28">
         <div class="event-month">September 28, 2025</div>
         <div class="event-details"><strong>6:00 - 7:30 PM</strong> Snacks, Devotion, Badminton 🏸</div>
-        <div class="rsvp-section"><div class="rsvp-form"><label for="name-2025-09-28">Your Name:</label><input id="name-2025-09-28" type="text" placeholder="Enter your name to RSVP"><div class="rsvp-buttons"><button class="rsvp-going" data-status="going">I'm Going!</button><button class="rsvp-not-going" data-status="not_going">Can't Make It</button></div></div><div class="attendee-list"><details class="attendee-details"><summary class="attendee-summary going-summary">Going (0)</summary><ul class="attendee-names going-list"></ul></details><details class="attendee-details"><summary class="attendee-summary not-going-summary">Not Going (0)</summary><ul class="attendee-names not-going-list"></ul></details></div></div>
+        <div class="rsvp-section"><div class="rsvp-form"><label for="name-2025-09-28">Your Name:</label><input id="name-2025-09-28" type="text" placeholder="Enter name"><div class="rsvp-buttons"><button class="rsvp-going" data-status="going">I'm Going!</button><button class="rsvp-not-going" data-status="not_going">Can't Make It</button></div></div><div class="attendee-list"><details class="attendee-details"><summary class="attendee-summary going-summary">Going (0)</summary><ul class="attendee-names going-list"></ul></details><details class="attendee-details"><summary class="attendee-summary not-going-summary">Not Going (0)</summary><ul class="attendee-names not-going-list"></ul></details></div></div>
     </div>
     <div class="event" id="2025-10-05" data-event-date="2025-10-05">
         <div class="event-month">October 5, 2025</div>
         <div class="event-details"><strong>6:00 - 7:30 PM</strong> Snacks, Devotion, Ax Throwing 🪓</div>
-        <div class="rsvp-section"><div class="rsvp-form"><label for="name-2025-10-05">Your Name:</label><input id="name-2025-10-05" type="text" placeholder="Enter your name to RSVP"><div class="rsvp-buttons"><button class="rsvp-going" data-status="going">I'm Going!</button><button class="rsvp-not-going" data-status="not_going">Can't Make It</button></div></div><div class="attendee-list"><details class="attendee-details"><summary class="attendee-summary going-summary">Going (0)</summary><ul class="attendee-names going-list"></ul></details><details class="attendee-details"><summary class="attendee-summary not-going-summary">Not Going (0)</summary><ul class="attendee-names not-going-list"></ul></details></div></div>
+        <div class="rsvp-section"><div class="rsvp-form"><label for="name-2025-10-05">Your Name:</label><input id="name-2025-10-05" type="text" placeholder="Enter name"><div class="rsvp-buttons"><button class="rsvp-going" data-status="going">I'm Going!</button><button class="rsvp-not-going" data-status="not_going">Can't Make It</button></div></div><div class="attendee-list"><details class="attendee-details"><summary class="attendee-summary going-summary">Going (0)</summary><ul class="attendee-names going-list"></ul></details><details class="attendee-details"><summary class="attendee-summary not-going-summary">Not Going (0)</summary><ul class="attendee-names not-going-list"></ul></details></div></div>
     </div>
-    <div class="event" id="2025-10-12" data-event-date="2025-10-12">
-        <div class="event-month">October 12, 2025</div>
-        <div class="event-details"><strong>6:00 - 7:30 PM</strong> Snacks, Devotion, Volleyball 🏐</div>
-        <div class="rsvp-section"><div class="rsvp-form"><label for="name-2025-10-12">Your Name:</label><input id="name-2025-10-12" type="text" placeholder="Enter your name to RSVP"><div class="rsvp-buttons"><button class="rsvp-going" data-status="going">I'm Going!</button><button class="rsvp-not-going" data-status="not_going">Can't Make It</button></div></div><div class="attendee-list"><details class="attendee-details"><summary class="attendee-summary going-summary">Going (0)</summary><ul class="attendee-names going-list"></ul></details><details class="attendee-details"><summary class="attendee-summary not-going-summary">Not Going (0)</summary><ul class="attendee-names not-going-list"></ul></details></div></div>
-    </div>
-    <div class="event" id="2025-10-19" data-event-date="2025-10-19">
-        <div class="event-month">October 19, 2025</div>
-        <div class="event-details"><strong>6:00 - 7:30 PM</strong> Out to Eat / Devotion 🍔</div>
-        <div class="rsvp-section"><div class="rsvp-form"><label for="name-2025-10-19">Your Name:</label><input id="name-2025-10-19" type="text" placeholder="Enter your name to RSVP"><div class="rsvp-buttons"><button class="rsvp-going" data-status="going">I'm Going!</button><button class="rsvp-not-going" data-status="not_going">Can't Make It</button></div></div><div class="attendee-list"><details class="attendee-details"><summary class="attendee-summary going-summary">Going (0)</summary><ul class="attendee-names going-list"></ul></details><details class="attendee-details"><summary class="attendee-summary not-going-summary">Not Going (0)</summary><ul class="attendee-names not-going-list"></ul></details></div></div>
-    </div>
-    <div class="event special-event" id="2025-11-21-hearts" data-event-date="2025-11-21">
-        <div class="event-month">November 21-23, 2025</div>
-        <div class="event-details"><strong>Special Event:</strong> Hearts on Fire 🔥</div>
-        <div class="rsvp-section"><div class="rsvp-form"><label for="name-2025-11-21-hearts">Your Name:</label><input id="name-2025-11-21-hearts" type="text" placeholder="Enter your name to RSVP"><div class="rsvp-buttons"><button class="rsvp-going" data-status="going">I'm Going!</button><button class="rsvp-not-going" data-status="not_going">Can't Make It</button></div></div><div class="attendee-list"><details class="attendee-details"><summary class="attendee-summary going-summary">Going (0)</summary><ul class="attendee-names going-list"></ul></details><details class="attendee-details"><summary class="attendee-summary not-going-summary">Not Going (0)</summary><ul class="attendee-names not-going-list"></ul></details></div></div>
-    </div>
-    <div class="event special-event" id="2025-12-06-firewood" data-event-date="2025-12-06">
-        <div class="event-month">December 6, 2025 (Saturday)</div>
-        <div class="event-details"><strong>Service Project:</strong> Deliver Firewood in Smyth County, VA</div>
-        <div class="rsvp-section"><div class="rsvp-form"><label for="name-2025-12-06-firewood">Your Name:</label><input id="name-2025-12-06-firewood" type="text" placeholder="Enter your name to RSVP"><div class="rsvp-buttons"><button class="rsvp-going" data-status="going">I'm Going!</button><button class="rsvp-not-going" data-status="not_going">Can't Make It</button></div></div><div class="attendee-list"><details class="attendee-details"><summary class="attendee-summary going-summary">Going (0)</summary><ul class="attendee-names going-list"></ul></details><details class="attendee-details"><summary class="attendee-summary not-going-summary">Not Going (0)</summary><ul class="attendee-names not-going-list"></ul></details></div></div>
-    </div>
-    <div class="event" id="2024-03-10-movie-night" data-event-date="2024-03-10">
+    <div class="event" id="2024-03-10" data-event-date="2024-03-10">
         <div class="event-month">March 10, 2024</div>
         <div class="event-details"><strong>7:00 PM</strong> Movie Night at the Church 🍿</div>
-        <div class="rsvp-section"><div class="rsvp-form"><label for="name-2024-03-10-movie-night">Your Name:</label><input id="name-2024-03-10-movie-night" type="text" placeholder="Enter your name to RSVP"><div class="rsvp-buttons"><button class="rsvp-going" data-status="going">I'm Going!</button><button class="rsvp-not-going" data-status="not_going">Can't Make It</button></div></div><div class="attendee-list"><details class="attendee-details"><summary class="attendee-summary going-summary">Going (0)</summary><ul class="attendee-names going-list"></ul></details><details class="attendee-details"><summary class="attendee-summary not-going-summary">Not Going (0)</summary><ul class="attendee-names not-going-list"></ul></details></div></div>
+    </div>
+</div>
+
+<div id="custom-alert-overlay" class="custom-alert-hidden">
+    <div id="custom-alert-box">
+        <p id="custom-alert-message"></p>
+        <button id="custom-alert-close">OK</button>
     </div>
 </div>
 
 <script>
-    // ▼▼▼ PASTE YOUR REAL SUPABASE INFO HERE OR IT WILL NOT WORK ▼▼▼
     const SUPABASE_URL = 'https://ennxufnseslqccasijqf.supabase.co'; 
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVubnh1Zm5zZXNscWNjYXNpanFmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg5MDY3ODIsImV4cCI6MjA3NDQ4Mjc4Mn0.WZUwR3iqXCJ_NrsOXBOwAlIF3Vx70yK2qZg1g4cwO94';
-    // ▲▲▲ PASTE YOUR REAL SUPABASE INFO HERE OR IT WILL NOT WORK ▲▲▲
 
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -440,7 +163,130 @@
         const prevBtn = document.getElementById('prev-event-btn');
         const nextBtn = document.getElementById('next-event-btn');
         const noUpcomingMessage = document.getElementById('no-upcoming-message');
+        const customAlertOverlay = document.getElementById('custom-alert-overlay');
+        const customAlertMessage = document.getElementById('custom-alert-message');
+        const customAlertClose = document.getElementById('custom-alert-close');
+
+        function showCustomAlert(message) { customAlertMessage.textContent = message; customAlertOverlay.classList.remove('custom-alert-hidden'); }
+        function hideCustomAlert() { customAlertOverlay.classList.add('custom-alert-hidden'); }
         
+        function sortAndPlaceEvents() {
+            eventDisplayArea.innerHTML = '';
+            pastEventsContainer.innerHTML = '';
+            upcomingEvents = [];
+            const eventElements = Array.from(allEventsSource.children);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            eventElements.sort((a, b) => new Date(a.dataset.eventDate) - new Date(b.dataset.eventDate));
+            
+            eventElements.forEach(eventEl => {
+                const eventDate = new Date(eventEl.dataset.eventDate + 'T00:00:00');
+                if (eventDate >= today) {
+                    upcomingEvents.push(eventEl);
+                    eventDisplayArea.appendChild(eventEl);
+                } else {
+                    pastEventsContainer.appendChild(eventEl);
+                    const rsvpSection = eventEl.querySelector('.rsvp-section');
+                    if (rsvpSection) rsvpSection.style.display = 'none';
+                }
+            });
+        }
+        
+        function displayCurrentEvent() {
+            upcomingEvents.forEach((eventEl, index) => {
+                eventEl.style.display = (index === currentIndex) ? 'block' : 'none';
+            });
+            prevBtn.disabled = (currentIndex === 0);
+            nextBtn.disabled = (currentIndex >= upcomingEvents.length - 1);
+        }
+
+        function handleNoUpcomingEvents() {
+            upcomingContainer.querySelector('#event-display-area').style.display = 'none';
+            upcomingContainer.querySelector('#event-navigation').style.display = 'none';
+            noUpcomingMessage.style.display = 'block';
+            noUpcomingMessage.textContent = 'No upcoming events are scheduled. Please check back soon!';
+        }
+
+        function setupEventListeners() {
+            nextBtn.addEventListener('click', () => { if (currentIndex < upcomingEvents.length - 1) { currentIndex++; displayCurrentEvent(); } });
+            prevBtn.addEventListener('click', () => { if (currentIndex > 0) { currentIndex--; displayCurrentEvent(); } });
+            
+            upcomingTab.addEventListener('click', () => {
+                pastEventsContainer.style.display = 'none';
+                upcomingContainer.style.display = 'block';
+                pastTab.classList.remove('active');
+                upcomingTab.classList.add('active');
+            });
+            
+            pastTab.addEventListener('click', () => {
+                upcomingContainer.style.display = 'none';
+                pastEventsContainer.style.display = 'block';
+                upcomingTab.classList.remove('active');
+                pastTab.classList.add('active');
+            });
+
+            document.addEventListener('click', (event) => {
+                if (event.target.classList.contains('rsvp-going') || event.target.classList.contains('rsvp-not-going')) {
+                    const button = event.target;
+                    const eventElement = button.closest('.event');
+                    const nameInput = eventElement.querySelector('input');
+                    addRSVP(eventElement, nameInput.value.trim(), button.dataset.status);
+                }
+            });
+
+            customAlertClose.addEventListener('click', hideCustomAlert);
+            customAlertOverlay.addEventListener('click', (event) => { if (event.target === customAlertOverlay) { hideCustomAlert(); } });
+        }
+        
+        async function fetchRSVPs() {
+            const events = document.querySelectorAll('#all-events-source .event');
+            for (const event of events) {
+                const eventId = event.id;
+                const { data, error } = await supabaseClient.from('rsvps').select('name, status').eq('event_id', eventId);
+                if (error) { console.error(`Error fetching RSVPs for ${eventId}:`, error); continue; }
+                
+                document.querySelectorAll(`#${CSS.escape(eventId)}`).forEach(displayedEvent => {
+                    const goingSummary = displayedEvent.querySelector('.going-summary');
+                    const notGoingSummary = displayedEvent.querySelector('.not-going-summary');
+                    const goingList = displayedEvent.querySelector('.going-list');
+                    const notGoingList = displayedEvent.querySelector('.not-going-list');
+                    if (!goingList || !notGoingList) return;
+
+                    const goingNames = data.filter(r => r.status === 'going');
+                    const notGoingNames = data.filter(r => r.status === 'not_going');
+                    goingSummary.textContent = `Going (${goingNames.length})`;
+                    goingList.innerHTML = '';
+                    goingNames.forEach(r => { const li = document.createElement('li'); li.textContent = r.name; goingList.appendChild(li); });
+                    notGoingSummary.textContent = `Not Going (${notGoingNames.length})`;
+                    notGoingList.innerHTML = '';
+                    notGoingNames.forEach(r => { const li = document.createElement('li'); li.textContent = r.name; notGoingList.appendChild(li); });
+                });
+            }
+        }
+
+        async function addRSVP(eventElement, name, status) {
+            if (!name) { 
+                showCustomAlert('Please enter your name to RSVP!'); // CUSTOMIZED MESSAGE HERE
+                return; 
+            }
+            const buttons = eventElement.querySelectorAll('.rsvp-buttons button');
+            buttons.forEach(b => { b.disabled = true; b.textContent = 'Saving...'; });
+            const { error } = await supabaseClient.from('rsvps').insert([{ event_id: eventElement.id, name: name, status: status }]);
+            if (error) {
+                console.error('Error saving RSVP:', error);
+                showCustomAlert('Sorry, there was an error saving your RSVP.');
+            } else {
+                showCustomAlert('Thanks! Your RSVP has been recorded.');
+                eventElement.querySelector('input').value = '';
+                await fetchRSVPs();
+            }
+            buttons.forEach(b => { b.disabled = false; });
+            eventElement.querySelector('.rsvp-going').textContent = "I'm Going!";
+            eventElement.querySelector('.rsvp-not-going').textContent = "Can't Make It";
+        }
+
+        // --- Initial Load ---
         sortAndPlaceEvents();
         if (upcomingEvents.length > 0) {
             displayCurrentEvent();
@@ -449,194 +295,6 @@
         }
         setupEventListeners();
         fetchRSVPs();
-
-        function sortAndPlaceEvents() {
-            // Clear existing content in case of re-sort or initial load
-            eventDisplayArea.innerHTML = '';
-            pastEventsContainer.innerHTML = '';
-            upcomingEvents = []; // Reset upcoming events array
-
-            const eventElements = Array.from(allEventsSource.children);
-            const today = new Date();
-            today.setHours(0, 0, 0, 0); // Normalize to start of day
-
-            // Sort all events by date (ascending) before categorizing
-            eventElements.sort((a, b) => {
-                const dateA = new Date(a.dataset.eventDate + 'T00:00:00');
-                const dateB = new Date(b.dataset.eventDate + 'T00:00:00');
-                return dateA - dateB;
-            });
-
-            eventElements.forEach(eventEl => {
-                const eventDateStr = eventEl.dataset.eventDate;
-                if (!eventDateStr) return;
-                
-                const eventDate = new Date(eventDateStr + 'T00:00:00'); 
-                
-                if (eventDate >= today) {
-                    // Clone the element for upcoming to prevent moving it directly
-                    // This is important if we want to also show it in the 'past' tab later
-                    const clonedEvent = eventEl.cloneNode(true); 
-                    upcomingEvents.push(clonedEvent);
-                    eventDisplayArea.appendChild(clonedEvent);
-                } else {
-                    const clonedEvent = eventEl.cloneNode(true);
-                    pastEventsContainer.appendChild(clonedEvent);
-                    const rsvpSection = clonedEvent.querySelector('.rsvp-section');
-                    if(rsvpSection) rsvpSection.style.display = 'none'; // Hide RSVP for past events
-                }
-            });
-            // Initial hide all upcoming events, displayCurrentEvent will show one
-            upcomingEvents.forEach(eventEl => eventEl.style.display = 'none');
-        }
-        
-        function displayCurrentEvent() {
-            // Hide all upcoming events first
-            upcomingEvents.forEach(eventEl => eventEl.style.display = 'none');
-            
-            // Show only the current event
-            if (upcomingEvents[currentIndex]) {
-                upcomingEvents[currentIndex].style.display = 'block';
-            }
-
-            // Update navigation button states
-            prevBtn.disabled = (currentIndex === 0);
-            nextBtn.disabled = (currentIndex >= upcomingEvents.length - 1);
-        }
-
-        function handleNoUpcomingEvents() {
-            if(eventDisplayArea) eventDisplayArea.style.display = 'none';
-            if(document.getElementById('event-navigation')) document.getElementById('event-navigation').style.display = 'none';
-            if(noUpcomingMessage) noUpcomingMessage.style.display = 'block';
-        }
-
-        function setupEventListeners() {
-            nextBtn.addEventListener('click', () => {
-                if (currentIndex < upcomingEvents.length - 1) {
-                    currentIndex++;
-                    displayCurrentEvent();
-                }
-            });
-
-            prevBtn.addEventListener('click', () => {
-                if (currentIndex > 0) {
-                    currentIndex--;
-                    displayCurrentEvent();
-                }
-            });
-
-            upcomingTab.addEventListener('click', () => {
-                pastEventsContainer.style.display = 'none';
-                upcomingContainer.style.display = 'block';
-                pastTab.classList.remove('active');
-                upcomingTab.classList.add('active');
-                // Ensure the current upcoming event is visible when switching back
-                if (upcomingEvents.length > 0) {
-                    displayCurrentEvent();
-                } else {
-                    handleNoUpcomingEvents();
-                }
-            });
-
-            pastTab.addEventListener('click', () => {
-                upcomingContainer.style.display = 'none';
-                pastEventsContainer.style.display = 'block';
-                upcomingTab.classList.remove('active');
-                pastTab.classList.add('active');
-            });
-
-            // Use event delegation for RSVP buttons
-            document.addEventListener('click', (event) => {
-                if (event.target.classList.contains('rsvp-going') || event.target.classList.contains('rsvp-not-going')) {
-                    const button = event.target;
-                    const eventElement = button.closest('.event');
-                    // Get the input field dynamically using the eventElement's ID
-                    const nameInput = eventElement.querySelector(`input[id="name-${eventElement.id}"]`);
-                    addRSVP(eventElement, nameInput.value.trim(), button.dataset.status);
-                }
-            });
-        }
-
-        async function fetchRSVPs() {
-            const allDisplayedEvents = document.querySelectorAll('#event-display-area .event, #past-events-container .event');
-            
-            for (const event of allDisplayedEvents) {
-                const eventId = event.id; // Use the event's ID directly
-                const goingSummary = event.querySelector('.going-summary');
-                const notGoingSummary = event.querySelector('.not-going-summary');
-                const goingList = event.querySelector('.going-list');
-                const notGoingList = event.querySelector('.not-going-list');
-
-                if (!goingList || !notGoingList || !goingSummary || !notGoingSummary) continue;
-
-                const { data, error } = await supabaseClient
-                    .from('rsvps')
-                    .select('name, status')
-                    .eq('event_id', eventId);
-
-                if (error) {
-                    console.error(`Error fetching RSVPs for event ${eventId}:`, error);
-                } else {
-                    const goingNames = data.filter(r => r.status === 'going');
-                    const notGoingNames = data.filter(r => r.status === 'not_going');
-
-                    goingSummary.textContent = `Going (${goingNames.length})`;
-                    goingList.innerHTML = '';
-                    goingNames.forEach(r => { 
-                        const li = document.createElement('li'); 
-                        li.textContent = r.name; 
-                        goingList.appendChild(li); 
-                    });
-
-                    notGoingSummary.textContent = `Not Going (${notGoingNames.length})`;
-                    notGoingList.innerHTML = '';
-                    notGoingNames.forEach(r => { 
-                        const li = document.createElement('li'); 
-                        li.textContent = r.name; 
-                        notGoingList.appendChild(li); 
-                    });
-                }
-            }
-        }
-
-        async function addRSVP(eventElement, name, status) {
-            if (!name) {
-                alert('Please enter your name to RSVP!');
-                return;
-            }
-
-            const buttons = eventElement.querySelectorAll('.rsvp-buttons button');
-            const originalGoingText = eventElement.querySelector('.rsvp-going').textContent;
-            const originalNotGoingText = eventElement.querySelector('.rsvp-not-going').textContent;
-
-            buttons.forEach(b => { 
-                b.disabled = true; 
-                if (b.dataset.status === status) {
-                    b.textContent = 'Saving...'; 
-                }
-            });
-
-            const { error } = await supabaseClient.from('rsvps').insert([{ event_id: eventElement.id, name: name, status: status }]);
-
-            if (error) {
-                console.error('Error saving RSVP:', error);
-                alert('Sorry, there was an error saving your RSVP. Please try again.');
-            } else {
-                alert('Thanks! Your RSVP has been recorded.');
-                eventElement.querySelector(`input[id="name-${eventElement.id}"]`).value = ''; // Clear input based on ID
-                await fetchRSVPs(); // Refresh RSVP counts and lists for all events
-            }
-            
-            // Re-enable buttons and restore text
-            buttons.forEach(b => { 
-                b.disabled = false; 
-                if (b.classList.contains('rsvp-going')) {
-                    b.textContent = originalGoingText;
-                } else if (b.classList.contains('rsvp-not-going')) {
-                    b.textContent = originalNotGoingText;
-                }
-            });
-        }
     });
 </script>
 
