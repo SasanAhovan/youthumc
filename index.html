@@ -9,11 +9,11 @@
 <style>
     :root {
         --bg-color-start: #ffffff;
-        --bg-color-end: #f1f5f9;
+        --bg-color-end: #f1f5f9; /* Light Slate Gray */
         --card-bg-color: #ffffff;
         --primary-color: #4f46e5;
         --primary-light: #e0e7ff;
-        --text-color-dark: #1e293b;
+        --text-color-dark: #1e2s93b;
         --text-color-medium: #475569;
         --text-color-light: #64748b;
         --special-event-color: #f97316;
@@ -79,7 +79,7 @@
     .attendee-names li { padding: 10px 15px; border-bottom: 1px solid var(--border-color); color: var(--text-color-medium); font-size: 0.95rem; }
     .attendee-names li:last-child { border-bottom: none; }
     #upcoming-events-container .event { display: none; }
-    #past-events-container { display: none; }
+    #past-events-container { display: none; } /* Initially hidden */
     #past-events-container .event { display: block !important; }
     .custom-alert-hidden { display: none !important; }
     #custom-alert-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(30, 41, 59, 0.5); display: flex; justify-content: center; align-items: center; z-index: 1000; opacity: 0; transition: opacity 0.2s ease-in-out; }
@@ -184,9 +184,9 @@
                 const eventDate = new Date(eventEl.dataset.eventDate + 'T00:00:00');
                 if (eventDate >= today) {
                     upcomingEvents.push(eventEl);
-                    eventDisplayArea.appendChild(eventEl);
+                    eventDisplayArea.appendChild(eventEl); // Move original, don't clone
                 } else {
-                    pastEventsContainer.appendChild(eventEl);
+                    pastEventsContainer.appendChild(eventEl); // Move original, don't clone
                     const rsvpSection = eventEl.querySelector('.rsvp-section');
                     if (rsvpSection) rsvpSection.style.display = 'none';
                 }
@@ -240,34 +240,32 @@
         }
         
         async function fetchRSVPs() {
-            const events = document.querySelectorAll('#all-events-source .event');
+            const events = [...eventDisplayArea.children, ...pastEventsContainer.children];
             for (const event of events) {
                 const eventId = event.id;
                 const { data, error } = await supabaseClient.from('rsvps').select('name, status').eq('event_id', eventId);
                 if (error) { console.error(`Error fetching RSVPs for ${eventId}:`, error); continue; }
                 
-                document.querySelectorAll(`#${CSS.escape(eventId)}`).forEach(displayedEvent => {
-                    const goingSummary = displayedEvent.querySelector('.going-summary');
-                    const notGoingSummary = displayedEvent.querySelector('.not-going-summary');
-                    const goingList = displayedEvent.querySelector('.going-list');
-                    const notGoingList = displayedEvent.querySelector('.not-going-list');
-                    if (!goingList || !notGoingList) return;
+                const goingSummary = event.querySelector('.going-summary');
+                const notGoingSummary = event.querySelector('.not-going-summary');
+                const goingList = event.querySelector('.going-list');
+                const notGoingList = event.querySelector('.not-going-list');
+                if (!goingList || !notGoingList) continue;
 
-                    const goingNames = data.filter(r => r.status === 'going');
-                    const notGoingNames = data.filter(r => r.status === 'not_going');
-                    goingSummary.textContent = `Going (${goingNames.length})`;
-                    goingList.innerHTML = '';
-                    goingNames.forEach(r => { const li = document.createElement('li'); li.textContent = r.name; goingList.appendChild(li); });
-                    notGoingSummary.textContent = `Not Going (${notGoingNames.length})`;
-                    notGoingList.innerHTML = '';
-                    notGoingNames.forEach(r => { const li = document.createElement('li'); li.textContent = r.name; notGoingList.appendChild(li); });
-                });
+                const goingNames = data.filter(r => r.status === 'going');
+                const notGoingNames = data.filter(r => r.status === 'not_going');
+                goingSummary.textContent = `Going (${goingNames.length})`;
+                goingList.innerHTML = '';
+                goingNames.forEach(r => { const li = document.createElement('li'); li.textContent = r.name; goingList.appendChild(li); });
+                notGoingSummary.textContent = `Not Going (${notGoingNames.length})`;
+                notGoingList.innerHTML = '';
+                notGoingNames.forEach(r => { const li = document.createElement('li'); li.textContent = r.name; notGoingList.appendChild(li); });
             }
         }
 
         async function addRSVP(eventElement, name, status) {
             if (!name) { 
-                showCustomAlert('Please enter your name to RSVP!'); // CUSTOMIZED MESSAGE HERE
+                showCustomAlert('Please enter your name to RSVP!');
                 return; 
             }
             const buttons = eventElement.querySelectorAll('.rsvp-buttons button');
